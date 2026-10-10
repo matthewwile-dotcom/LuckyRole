@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Role System - Character Generator & Sheet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --sheet-bg: #111827;
+            --primary-gold: #fbbf24;
+            --primary-gold-hover: #f59e0b;
+            --border-color: #374151;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --input-bg: #1f2937;
+            --card-bg: #1a2234;
+            --accent-glow: rgba(251, 191, 36, 0.15);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 20px;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.5) 0%, transparent 60%),
+                radial-gradient(circle at 10% 90%, rgba(15, 23, 42, 0.8) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .sheet-container {
+            max-width: 980px;
+            margin: 0 auto;
+            background-color: var(--sheet-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .sheet-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d97706, var(--primary-gold), #d97706);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: var(--primary-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        p.subtitle {
+            margin: 8px 0 0 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+        }
+
+        .section-title {
+            background: linear-gradient(90deg, rgba(217, 119, 6, 0.2), transparent);
+            color: var(--primary-gold);
+            padding: 8px 14px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-top: 30px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-left: 4px solid var(--primary-gold);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 14px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"], select {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: var(--input-bg);
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .aptitude-card {
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .aptitude-card:hover {
+            border-color: rgba(251, 191, 36, 0.4);
+        }
+
+        .aptitude-card label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+        }
+
+        .aptitude-card select {
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem;
+            padding: 6px;
+        }
+
+        .skills-grid, .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-height: 480px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+        }
+
+        .equipment-grid {
+            max-height: 320px;
+        }
+
+        .skills-grid::-webkit-scrollbar, .equipment-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        .skills-grid::-webkit-scrollbar-track, .equipment-grid::-webkit-scrollbar-track {
+            background: var(--input-bg);
+            border-radius: 4px;
+        }
+        .skills-grid::-webkit-scrollbar-thumb, .equipment-grid::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        .skills-grid::-webkit-scrollbar-thumb:hover, .equipment-grid::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-gold);
+        }
+
+        @media (max-width: 800px) {
+            .skills-grid, .equipment-grid {
+                grid-template-columns: 1fr;
+            }
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .skill-row-box, .equipment-row-box {
+            display: flex;
+            gap: 10px;
+            background: var(--input-bg);
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            align-items: center;
+        }
+
+        .skill-row-box select, .equipment-row-box input {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+        }
+
+        .skill-row-box .degree-select {
+            width: 130px;
+            font-size: 0.85rem;
+        }
+
+        .actions {
+            margin-top: 35px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 12px 28px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+            background-color: var(--accent-glow);
+        }
+
+        .btn-generate {
+            background-color: var(--primary-gold);
+            color: #0b0f19;
+            border-color: var(--primary-gold);
+        }
+
+        .btn-generate:hover {
+            background-color: var(--primary-gold-hover);
+            color: #0b0f19;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        @media print {
+            body {
+                background-color: #fff;
+                color: #1e293b;
+                padding: 0;
+            }
+            .sheet-container {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+                background-color: #fff;
+            }
+            .sheet-container::before {
+                display: none;
+            }
+            .actions {
+                display: none;
+            }
+            input[type="text"], select {
+                border: none;
+                border-bottom: 1px solid #000;
+                border-radius: 0;
+                padding: 4px 0;
+                background: transparent;
+                color: #000;
+            }
+            .skills-grid, .equipment-grid {
+                max-height: none;
+                overflow: visible;
+                border: none;
+                background: transparent;
+            }
+            .skill-row-box, .equipment-row-box {
+                border: 1px solid #cbd5e1;
+                background: transparent;
+            }
+            .section-title {
+                background: #f1f5f9;
+                color: #0f172a;
+                border-left-color: #0f172a;
+            }
+            .aptitude-card {
+                background: #f8fafc;
+                border-color: #cbd5e1;
+            }
+            .aptitude-card label {
+                color: #0f172a;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sheet-container">
+    <header>
+        <h1>Lucky Role System</h1>
+        <p class="subtitle">Character Generator & Record Sheet</p>
+    </header>
+
+    <!-- Character Identity -->
+    <div class="section-title">Character Details</div>
+    <div class="grid-2">
+        <div class="form-field">
+            <label for="charName">Character Name</label>
+            <input type="text" id="charName" value="Kaelen Vane" placeholder="Enter character name...">
+        </div>
+        <div class="form-field">
+            <label for="charPlayer">Player Name</label>
+            <input type="text" id="charPlayer" placeholder="Enter player name...">
+        </div>
+        <div class="form-field">
+            <label for="charSetting">Setting Framework</label>
+            <select id="charSetting" onchange="onSettingChange()">
+                <option value="sci-fi">Sci-Fi / Interstellar</option>
+                <option value="fantasy">Classic Fantasy</option>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="charSpecies">Species Origin</label>
+            <select id="charSpecies" onchange="onSelectionChange()">
+                <!-- Populated dynamically -->
+            </select>
+        </div>
+        <div class="form-field" style="grid-column: span 2;">
+            <label for="charProfession">Profession Specialization</label>
+            <select id="charProfession" onchange="onSelectionChange()">
+                <!-- Populated dynamically -->
+            </select>
+        </div>
+    </div>
+
+    <!-- Aptitudes -->
+    <div class="section-title">Aptitudes & Core Ratings</div>
+    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: -6px; margin-bottom: 14px;">
+        Degrees: Inept (-2 / D4), Untrained (0 / D6), Trained (+2 / D8), Expert (+4 / D10), Genius (+6 / D12)
+    </p>
+    <div class="grid-4" id="aptitudesGrid">
+        <div class="aptitude-card">
+            <label>Might</label>
+            <select id="aptMight">
+                <option>Inept (-2 / D4)</option><option>Untrained (0 / D6)</option><option selected>Trained (+2 / D8)</option><option>Expert (+4 / D10)</option><option>Genius (+6 / D12)</option>
+            </select>
+        </div>
+        <div class="aptitude-card">
+            <label>Agility</label>
+            <select id="aptAgility">
+                <option>Inept (-2 / D4)</option><option>Untrained (0 / D6)</option><option selected>Trained (+2 / D8)</option><option>Expert (+4 / D10)</option><option>Genius (+6 / D12)</option>
+            </select>
+        </div>
+        <div class="aptitude-card">
+            <label>Vigor</label>
+            <select id="aptVigor">
+                <option>Inept (-2 / D4)</option><option selected>Untrained (0 / D6)</option><option>Trained (+2 / D8)</option><option>Expert (+4 / D10)</option><option>Genius (+6 / D12)</option>
+            </select>
+        </div>
+        <div class="aptitude-card">
+            <label>Intellect</label>
+            <select id="aptIntellect">
+                <option>Inept (-2 / D4)</option><option>Untrained (0 / D6)</option><option selected>Trained (+2 / D8)</option><option>Expert (+4 / D10)</option><option>Genius (+6 / D12)</option>
+            </select>
+        </div>
+        <div class="aptitude-card">
+            <label>Awareness</label>
+            <select id="aptAwareness">
+                <option>Inept (-2 / D4)</option><option selected>Untrained (0 / D6)</option><option>Trained (+2 / D8)</option><option>Expert (+4 / D10)</option><option>Genius (+6 / D12)</option>
+            </select>
+        </div>
+        <div class="aptitude-card">
+            <label>Presence</label>
+            <select id="aptPresence">
+                <option>Inept (-2 / D4)</option><option selected>Untrained (0 / D6)</option><option>Trained (+2 / D8)</option><option>Expert (+4 / D10)</option><option>Genius (+6 / D12)</option>
+            </select>
+        </div>
+        <div class="aptitude-card">
+            <label>Will</label>
+            <select id="aptWill">
+                <option>Inept (-2 / D4)</option><option selected>Untrained (0 / D6)</option><option>Trained (+2 / D8)</option><option>Expert (+4 / D10)</option><option>Genius (+6 / D12)</option>
+            </select>
+        </div>
+        <div class="aptitude-card">
+            <label>Tech / Mysticism</label>
+            <select id="aptTech">
+                <option>Inept (-2 / D4)</option><option>Untrained (0 / D6)</option><option>Trained (+2 / D8)</option><option selected>Expert (+4 / D10)</option><option>Genius (+6 / D12)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Skills Matrix -->
+    <div class="section-title">Skills Matrix (30 Open Slots)</div>
+    <div class="skills-grid" id="skillsGrid"></div>
+
+    <!-- Equipment & Experience Points -->
+    <div class="section-title">Equipment & Experience Points</div>
+    <div class="grid-2" style="margin-bottom: 14px;">
+        <div class="form-field">
+            <label>Experience Points (XP)</label>
+            <input type="text" id="charXP" value="0 Available / 15 Total">
+        </div>
+        <div class="form-field">
+            <label>Currency / Funds</label>
+            <input type="text" id="charFunds" value="500 Credits / Gold Pieces">
+        </div>
+    </div>
+
+    <label style="margin-bottom: 6px; display: block;">Equipment Inventory (20 Slots)</label>
+    <div class="equipment-grid" id="equipmentGrid"></div>
+
+    <!-- Export Action -->
+    <div class="actions">
+        <button class="btn btn-generate" onclick="generateRandomCharacter()">Auto-Generate Character</button>
+        <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+</div>
+
+<script>
+    const baseSpeciesSkills = {
+        "Terran Human": ["History (Intellect)", "Perception (Awareness)", "Persuasion (Presence)", "Survival (Vigor)", "Athletics (Might)"],
+        "Veyari": ["Acrobatics (Agility)", "Stealth (Agility)", "Insight (Awareness)", "Light Armor (Agility)", "Finesse Weapons (Agility)"],
+        "Kharuun": ["Athletics (Might)", "Intimidation (Might)", "Endurance (Vigor)", "Heavy Weapons (Might)", "Fortitude (Vigor)"],
+        "Sylari": ["Computer Science (Intellect)", "Electronics (Technology)", "Hacking (Technology)", "Engineering (Intellect)", "Systems Engineering (Technology)"],
+        "Dravok": ["Heavy Weapons (Might)", "Heavy Armor (Might)", "Fortitude (Vigor)", "Feats of Strength (Might)", "Pain Tolerance (Vigor)"],
+        "Myrathi": ["Finesse Weapons (Agility)", "Deception (Presence)", "Tactics (Intellect)", "Quick Draw (Agility)", "Evasion (Agility)"],
+        "Qelith": ["Navigation (Awareness)", "Zero-G Adaptation (Vigor)", "Engineering (Intellect)", "Perception (Awareness)", "Searching (Awareness)"],
+        "Avarren": ["Survival (Vigor)", "Tracking (Awareness)", "Marksmanship (Agility)", "Hunting (Awareness)", "Reconnaissance (Awareness)"],
+        "Gorath": ["Feats of Strength (Might)", "Pain Tolerance (Vigor)", "Hand-to-Hand Combat (Might)", "Athletics (Might)", "Endurance (Vigor)"],
+        "Elari": ["Diplomacy (Presence)", "Languages (Intellect)", "Meditation (Will)", "Etiquette (Presence)", "Insight (Awareness)"],
+        "Zorvax": ["Cybernetics (Technology)", "Robotics (Technology)", "Systems Engineering (Technology)", "Electronics (Technology)", "Artificial Intelligence (Technology)"],
+        "Nymari": ["Aircraft Piloting (Agility)", "Threat Detection (Awareness)", "Concentration (Will)", "Navigation (Awareness)", "Perception (Awareness)"],
+        "Human": ["Persuasion (Presence)", "History (Intellect)", "Leadership (Presence)", "Survival (Vigor)", "Athletics (Might)"],
+        "Elf": ["Archery (Agility)", "Perception (Awareness)", "Arcana (Intellect)", "Finesse Weapons (Agility)", "Stealth (Agility)"],
+        "Dwarf": ["Feats of Strength (Might)", "Endurance (Vigor)", "Lore (Intellect)", "Heavy Armor (Might)", "Fortitude (Vigor)"],
+        "Halfling": ["Stealth (Agility)", "Sleight of Hand (Agility)", "Insight (Awareness)", "Acrobatics (Agility)", "Thievery (Agility)"],
+        "Orc": ["Athletics (Might)", "Intimidation (Might)", "Fortitude (Vigor)", "Power Strike (Might)", "Endurance (Vigor)"],
+        "Gnome": ["Alchemy (Intellect)", "Engineering (Intellect)", "Deception (Presence)", "Sleight of Hand (Agility)", "Technical Lore (Intellect)"],
+        "Scaleborn": ["Heavy Armor (Might)", "Pain Tolerance (Vigor)", "Survival (Vigor)", "Feats of Strength (Might)", "Athletics (Might)"],
+        "Infernalborn": ["Resistance (Will)", "Intimidation (Might)", "Occultism (Mysticism)", "Concentration (Will)", "Deception (Presence)"],
+        "Beastfolk": ["Tracking (Awareness)", "Hunting (Awareness)", "Acrobatics (Agility)", "Survival (Vigor)", "Perception (Awareness)"],
+        "Feyborn": ["Performance (Presence)", "Nature (Intellect)", "Meditation (Will)", "Deception (Presence)", "Insight (Awareness)"],
+        "Goblin": ["Thievery (Agility)", "Streetwise (Awareness)", "Evasion (Agility)", "Stealth (Agility)", "Sleight of Hand (Agility)"],
+        "Celestial": ["Faith (Will)", "Inspiration (Presence)", "Meditation (Will)", "Command (Will)", "Persuasion (Presence)"]
+    };
+
+    const universalProfessionSkills = {
+        "Marine": ["Heavy Weapons (Might)", "Heavy Armor (Might)", "Tactics (Intellect)", "Endurance (Vigor)", "Athletics (Might)", "Fortitude (Vigor)", "Hand-to-Hand Combat (Might)", "Perception (Awareness)", "Demolitions (Might)", "Command (Will)"],
+        "Shock Trooper": ["Hand-to-Hand Combat (Might)", "Heavy Armor (Might)", "Breaching (Might)", "Demolitions (Might)", "Athletics (Might)", "Power Strike (Might)", "Endurance (Vigor)", "Tactics (Intellect)", "Quick Draw (Agility)", "Intimidation (Might)"],
+        "Heavy Gunner": ["Heavy Weapons (Might)", "Fortitude (Vigor)", "Tactics (Intellect)", "Threat Detection (Awareness)", "Endurance (Vigor)", "Heavy Armor (Might)", "Perception (Awareness)", "Advanced Weapons (Technology)", "Command (Will)", "Athletics (Might)"],
+        "Powered Armor Trooper": ["Heavy Armor (Might)", "Feats of Strength (Might)", "Systems Engineering (Technology)", "Endurance (Vigor)", "Heavy Weapons (Might)", "Tactics (Intellect)", "Engineering (Intellect)", "Fortitude (Vigor)", "Power Strike (Might)", "Athletics (Might)"],
+        "Brawler": ["Hand-to-Hand Combat (Might)", "Grappling (Might)", "Pain Tolerance (Vigor)", "Power Strike (Might)", "Athletics (Might)", "Endurance (Vigor)", "Brawling (Might)", "Fortitude (Vigor)", "Intimidation (Might)", "Light Armor (Agility)"],
+        "Mercenary": ["Marksmanship (Agility)", "Quick Draw (Agility)", "Light Armor (Agility)", "Streetwise (Awareness)", "Stealth (Agility)", "Hand-to-Hand Combat (Might)", "Tactics (Intellect)", "Perception (Awareness)", "Evasion (Agility)", "Deception (Presence)"],
+        "Siege Specialist": ["Demolitions (Might)", "Breaching (Might)", "Engineering (Intellect)", "Heavy Weapons (Might)", "Siegecraft (Might)", "Heavy Armor (Might)", "Tactics (Intellect)", "Fortitude (Vigor)", "Athletics (Might)", "Feats of Strength (Might)"],
+        "Combat Engineer": ["Engineering (Intellect)", "Systems Engineering (Technology)", "Electronics (Technology)", "Repair (Vigor)", "Technical Lore (Intellect)", "Computer Science (Intellect)", "Perception (Awareness)", "Heavy Armor (Might)", "Demolitions (Might)", "Athletics (Might)"],
+        "Bounty Enforcer": ["Tracking (Awareness)", "Marksmanship (Agility)", "Grappling (Might)", "Streetwise (Awareness)", "Perception (Awareness)", "Hand-to-Hand Combat (Might)", "Insight (Awareness)", "Quick Draw (Agility)", "Intimidation (Might)", "Investigation (Intellect)"],
+        "Heavy Weapons Specialist": ["Heavy Weapons (Might)", "Tactics (Intellect)", "Advanced Weapons (Technology)", "Fortitude (Vigor)", "Heavy Armor (Might)", "Endurance (Vigor)", "Perception (Awareness)", "Athletics (Might)", "Demolitions (Might)", "Command (Will)"],
+        "Mechanic": ["Engineering (Intellect)", "Electronics (Technology)", "Systems Engineering (Technology)", "Robotics (Technology)", "Technical Lore (Intellect)", "Computer Science (Intellect)", "Repair (Vigor)", "Perception (Awareness)", "Athletics (Might)", "Searching (Awareness)"],
+        "Construction Worker": ["Feats of Strength (Might)", "Endurance (Vigor)", "Engineering (Intellect)", "Foraging (Vigor)", "Athletics (Might)", "Fortitude (Vigor)", "Technical Lore (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Ground Vehicles (Agility)"],
+        "Miner": ["Survival (Vigor)", "Fortitude (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Feats of Strength (Might)", "Foraging (Vigor)", "Navigation (Awareness)", "Technical Lore (Intellect)"],
+        "Dockworker": ["Athletics (Might)", "Feats of Strength (Might)", "Ground Vehicles (Agility)", "Navigation (Awareness)", "Endurance (Vigor)", "Fortitude (Vigor)", "Perception (Awareness)", "Streetwise (Awareness)", "Bartering (Presence)", "Foraging (Vigor)"],
+        "Cargo Handler": ["Athletics (Might)", "Endurance (Vigor)", "Ground Vehicles (Agility)", "Feats of Strength (Might)", "Fortitude (Vigor)", "Perception (Awareness)", "Navigation (Awareness)", "Streetwise (Awareness)", "Searching (Awareness)", "Foraging (Vigor)"],
+        "Salvage Worker": ["Searching (Awareness)", "Engineering (Intellect)", "Zero-G Adaptation (Vigor)", "Perception (Awareness)", "Engineering (Intellect)", "Technical Lore (Intellect)", "Survival (Vigor)", "Athletics (Might)", "Electronics (Technology)", "Fortitude (Vigor)"],
+        "Industrial Worker": ["Endurance (Vigor)", "Electronics (Technology)", "Engineering (Intellect)", "Technical Lore (Intellect)", "Fortitude (Vigor)", "Athletics (Might)", "Feats of Strength (Might)", "Computer Science (Intellect)", "Perception (Awareness)", "Searching (Awareness)"],
+        "Demolition Worker": ["Demolitions (Might)", "Engineering (Intellect)", "Perception (Awareness)", "Fortitude (Vigor)", "Athletics (Might)", "Breaching (Might)", "Technical Lore (Intellect)", "Concentration (Will)", "Tactics (Intellect)", "Endurance (Vigor)"],
+        "Heavy Equipment Operator": ["Ground Vehicles (Agility)", "Aircraft Piloting (Agility)", "Engineering (Intellect)", "Perception (Awareness)", "Navigation (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Technical Lore (Intellect)", "Concentration (Will)", "Searching (Awareness)"],
+        "Shipyard Worker": ["Engineering (Intellect)", "Systems Engineering (Technology)", "Athletics (Might)", "Electronics (Technology)", "Technical Lore (Intellect)", "Zero-G Adaptation (Vigor)", "Perception (Awareness)", "Endurance (Vigor)", "Searching (Awareness)", "Fortitude (Vigor)"],
+        "Pilot": ["Aircraft Piloting (Agility)", "Navigation (Awareness)", "Zero-G Adaptation (Vigor)", "Evasion (Agility)", "Concentration (Will)", "Perception (Awareness)", "Computer Science (Intellect)", "Combat Focus (Will)", "Tactics (Intellect)", "Engineering (Intellect)"],
+        "Ace Pilot": ["Aircraft Piloting (Agility)", "Evasion (Agility)", "Concentration (Will)", "Combat Focus (Will)", "Navigation (Awareness)", "Zero-G Adaptation (Vigor)", "Perception (Awareness)", "Tactics (Intellect)", "Quick Draw (Agility)", "Discipline (Will)"],
+        "Fighter Pilot": ["Aircraft Piloting (Agility)", "Threat Detection (Awareness)", "Tactics (Intellect)", "Combat Focus (Will)", "Navigation (Awareness)", "Evasion (Agility)", "Concentration (Will)", "Perception (Awareness)", "Advanced Weapons (Technology)", "Command (Will)"],
+        "Driver": ["Ground Vehicles (Agility)", "Navigation (Awareness)", "Perception (Awareness)", "Evasion (Agility)", "Streetwise (Awareness)", "Endurance (Vigor)", "Concentration (Will)", "Mechanics (Engineering)", "Athletics (Might)", "Quick Draw (Agility)"],
+        "Scout": ["Reconnaissance (Awareness)", "Stealth (Agility)", "Tracking (Awareness)", "Survival (Vigor)", "Perception (Awareness)", "Marksmanship (Agility)", "Navigation (Awareness)", "Searching (Awareness)", "Evasion (Agility)", "Hunting (Awareness)"],
+        "Sniper": ["Marksmanship (Agility)", "Stealth (Agility)", "Perception (Awareness)", "Evasion (Agility)", "Tracking (Awareness)", "Concentration (Will)", "Camouflage (Stealth)", "Quick Draw (Agility)", "Tactics (Intellect)", "Reconnaissance (Awareness)"],
+        "Assassin": ["Stealth (Agility)", "Finesse Weapons (Agility)", "Sleight of Hand (Agility)", "Deception (Presence)", "Perception (Awareness)", "Quick Draw (Agility)", "Evasion (Agility)", "Insight (Awareness)", "Poison Lore (Alchemy)", "Acrobatics (Agility)"],
+        "Infiltrator": ["Stealth (Agility)", "Hacking (Technology)", "Sleight of Hand (Agility)", "Perception (Awareness)", "Acrobatics (Agility)", "Electronics (Technology)", "Deception (Presence)", "Evasion (Agility)", "Computer Science (Intellect)", "Searching (Awareness)"],
+        "Biker": ["Ground Vehicles (Agility)", "Acrobatics (Agility)", "Streetwise (Awareness)", "Quick Draw (Agility)", "Endurance (Vigor)", "Perception (Awareness)", "Athletics (Might)", "Intimidation (Might)", "Light Armor (Agility)", "Navigation (Awareness)"],
+        "Gunslinger": ["Marksmanship (Agility)", "Quick Draw (Agility)", "Finesse Weapons (Agility)", "Evasion (Agility)", "Perception (Awareness)", "Streetwise (Awareness)", "Deception (Presence)", "Concentration (Will)", "Light Armor (Agility)", "Athletics (Might)"],
+        "Commercial Pilot": ["Aircraft Piloting (Agility)", "Navigation (Awareness)", "Etiquette (Presence)", "Perception (Awareness)", "Concentration (Will)", "Computer Science (Intellect)", "Persuasion (Presence)", "Zero-G Adaptation (Vigor)", "Leadership (Presence)", "Engineering (Intellect)"],
+        "Shuttle Pilot": ["Aircraft Piloting (Agility)", "Ground Vehicles (Agility)", "Navigation (Awareness)", "Communication (Presence)", "Zero-G Adaptation (Vigor)", "Perception (Awareness)", "Engineering (Intellect)", "Concentration (Will)", "Etiquette (Presence)", "Computer Science (Intellect)"],
+        "Truck Driver": ["Ground Vehicles (Agility)", "Endurance (Vigor)", "Streetwise (Awareness)", "Navigation (Awareness)", "Perception (Awareness)", "Fortitude (Vigor)", "Bartering (Presence)", "Athletics (Might)", "Concentration (Will)", "Repair (Vigor)"],
+        "Taxi Driver": ["Ground Vehicles (Agility)", "Streetwise (Awareness)", "Perception (Awareness)", "Persuasion (Presence)", "Bartering (Presence)", "Etiquette (Presence)", "Navigation (Awareness)", "Concentration (Will)", "Endurance (Vigor)", "Deception (Presence)"],
+        "Courier": ["Acrobatics (Agility)", "Stealth (Agility)", "Perception (Awareness)", "Streetwise (Awareness)", "Endurance (Vigor)", "Quick Draw (Agility)", "Evasion (Agility)", "Navigation (Awareness)", "Concentration (Will)", "Athletics (Might)"],
+        "Racer": ["Ground Vehicles (Agility)", "Aircraft Piloting (Agility)", "Acrobatics (Agility)", "Concentration (Will)", "Evasion (Agility)", "Quick Draw (Agility)", "Perception (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Navigation (Awareness)"],
+        "Vehicle Instructor": ["Ground Vehicles (Agility)", "Aircraft Piloting (Agility)", "Leadership (Presence)", "Persuasion (Presence)", "Navigation (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Etiquette (Presence)", "Engineering (Intellect)", "Instruction (Presence)"],
+        "Mechanic's Assistant": ["Engineering (Intellect)", "Electronics (Technology)", "Athletics (Might)", "Technical Lore (Intellect)", "Systems Engineering (Technology)", "Repair (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Fortitude (Vigor)", "Computer Science (Intellect)"],
+        "Flight Attendant": ["Etiquette (Presence)", "Persuasion (Presence)", "Perception (Awareness)", "Medicine (Intellect)", "Communication (Presence)", "Concentration (Will)", "Endurance (Vigor)", "Deception (Presence)", "Leadership (Presence)", "First Aid (Medicine)"],
+        "Transport Operator": ["Ground Vehicles (Agility)", "Navigation (Awareness)", "Engineering (Intellect)", "Perception (Awareness)", "Concentration (Will)", "Zero-G Adaptation (Vigor)", "Endurance (Vigor)", "Computer Science (Intellect)", "Bartering (Presence)", "Streetwise (Awareness)"],
+        "Frontier Ranger": ["Survival (Vigor)", "Tracking (Awareness)", "Marksmanship (Agility)", "Hunting (Awareness)", "Reconnaissance (Awareness)", "Perception (Awareness)", "Navigation (Awareness)", "Athletics (Might)", "Light Armor (Agility)", "Endurance (Vigor)"],
+        "Colonist": ["Survival (Vigor)", "Foraging (Vigor)", "Endurance (Vigor)", "Persuasion (Presence)", "Fortitude (Vigor)", "Athletics (Might)", "Perception (Awareness)", "Bartering (Presence)", "Animal Handling (Awareness)", "Nature (Intellect)"],
+        "Explorer": ["Navigation (Awareness)", "Survival (Vigor)", "History (Intellect)", "Xenology (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Investigation (Intellect)", "Athletics (Might)", "Endurance (Vigor)", "Languages (Intellect)"],
+        "Hazard Specialist": ["Cold Resistance (Vigor)", "Heat Resistance (Vigor)", "Zero-G Adaptation (Vigor)", "Survival (Vigor)", "Fortitude (Vigor)", "Endurance (Vigor)", "Perception (Awareness)", "Engineering (Intellect)", "Medicine (Intellect)", "Resistance (Will)"],
+        "Wasteland Warrior": ["Survival (Vigor)", "Endurance (Vigor)", "Light Armor (Agility)", "Marksmanship (Agility)", "Athletics (Might)", "Hand-to-Hand Combat (Might)", "Fortitude (Vigor)", "Perception (Awareness)", "Tracking (Awareness)", "Intimidation (Might)"],
+        "Exoplanet Scout": ["Reconnaissance (Awareness)", "Survival (Vigor)", "Xenology (Intellect)", "Tracking (Awareness)", "Navigation (Awareness)", "Perception (Awareness)", "Marksmanship (Agility)", "Stealth (Agility)", "Athletics (Might)", "Searching (Awareness)"],
+        "Deep-Space Survivor": ["Zero-G Adaptation (Vigor)", "Endurance (Vigor)", "Concentration (Will)", "Survival (Vigor)", "Fortitude (Vigor)", "Perception (Awareness)", "Resourcefulness (Intellect)", "Engineering (Intellect)", "Medical Science (Medicine)", "Resolve (Will)"],
+        "Radiation Walker": ["Fortitude (Vigor)", "Survival (Vigor)", "Medicine (Intellect)", "Resistance (Will)", "Endurance (Vigor)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Technical Lore (Intellect)", "Zero-G Adaptation (Vigor)"],
+        "Void Marine": ["Zero-G Adaptation (Vigor)", "Heavy Weapons (Might)", "Heavy Armor (Might)", "Tactics (Intellect)", "Endurance (Vigor)", "Fortitude (Vigor)", "Marksmanship (Agility)", "Perception (Awareness)", "Command (Will)", "Athletics (Might)"],
+        "Expedition Leader": ["Leadership (Presence)", "Tactics (Intellect)", "Survival (Vigor)", "Persuasion (Presence)", "Navigation (Awareness)", "Command (Will)", "Perception (Awareness)", "Inspiration (Presence)", "Endurance (Vigor)", "History (Intellect)"],
+        "Farmer": ["Foraging (Vigor)", "Endurance (Vigor)", "Animal Handling (Awareness)", "Nature (Intellect)", "Survival (Vigor)", "Athletics (Might)", "Fortitude (Vigor)", "Bartering (Presence)", "Perception (Awareness)", "Searching (Awareness)"],
+        "Hydroponics Farmer": ["Science (Intellect)", "Engineering (Intellect)", "Foraging (Vigor)", "Endurance (Vigor)", "Nature (Intellect)", "Medicine (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Computer Science (Intellect)", "Technical Lore (Intellect)"],
+        "Terraforming Worker": ["Engineering (Intellect)", "Science (Intellect)", "Endurance (Vigor)", "Ground Vehicles (Agility)", "Fortitude (Vigor)", "Athletics (Might)", "Feats of Strength (Might)", "Perception (Awareness)", "Searching (Awareness)", "Technical Lore (Intellect)"],
+        "Fisher": ["Survival (Vigor)", "Perception (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Swimming (Vigor)", "Fortitude (Vigor)", "Navigation (Awareness)", "Foraging (Vigor)", "Searching (Awareness)", "Bartering (Presence)"],
+        "Rancher": ["Animal Handling (Awareness)", "Survival (Vigor)", "Riding (Agility)", "Endurance (Vigor)", "Perception (Awareness)", "Athletics (Might)", "Fortitude (Vigor)", "Bartering (Presence)", "Searching (Awareness)", "Nature (Intellect)"],
+        "Wilderness Guide": ["Tracking (Awareness)", "Navigation (Awareness)", "Survival (Vigor)", "Persuasion (Presence)", "Perception (Awareness)", "Animal Handling (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Hunting (Awareness)"],
+        "Colony Worker": ["Endurance (Vigor)", "Athletics (Might)", "Foraging (Vigor)", "Feats of Strength (Might)", "Fortitude (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Bartering (Presence)", "Survival (Vigor)", "Navigation (Awareness)"],
+        "Environmental Technician": ["Science (Intellect)", "Engineering (Intellect)", "Investigation (Intellect)", "Technical Lore (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Survival (Vigor)", "Concentration (Will)", "Computer Science (Intellect)", "Medicine (Intellect)"],
+        "Deep-Space Crewman": ["Zero-G Adaptation (Vigor)", "Engineering (Intellect)", "Endurance (Vigor)", "Perception (Awareness)", "Fortitude (Vigor)", "Electronics (Technology)", "Systems Engineering (Technology)", "Searching (Awareness)", "Navigation (Awareness)", "Concentration (Will)"],
+        "Scientist": ["Science (Intellect)", "Investigation (Intellect)", "Technical Lore (Intellect)", "Computer Science (Intellect)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Languages (Intellect)", "History (Intellect)", "Medicine (Intellect)"],
+        "Xenologist": ["Xenology (Intellect)", "Science (Intellect)", "History (Intellect)", "Languages (Intellect)", "Investigation (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Survival (Vigor)", "Technical Lore (Intellect)"],
+        "Investigator": ["Investigation (Intellect)", "Perception (Awareness)", "Insight (Awareness)", "Searching (Awareness)", "Languages (Intellect)", "Deception (Presence)", "Persuasion (Presence)", "Concentration (Will)", "Streetwise (Awareness)", "Law (Intellect)"],
+        "Tactician": ["Tactics (Intellect)", "Command (Will)", "History (Intellect)", "Concentration (Will)", "Leadership (Presence)", "Perception (Awareness)", "Strategy (Intellect)", "Searching (Awareness)", "Languages (Intellect)", "Navigation (Awareness)"],
+        "Engineer": ["Engineering (Intellect)", "Systems Engineering (Technology)", "Technical Lore (Intellect)", "Electronics (Technology)", "Computer Science (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Robotics (Technology)", "Concentration (Will)", "Repair (Vigor)"],
+        "Archaeologist": ["History (Intellect)", "Investigation (Intellect)", "Searching (Awareness)", "Languages (Intellect)", "Perception (Awareness)", "Survival (Vigor)", "Athletics (Might)", "Endurance (Vigor)", "Concentration (Will)", "Technical Lore (Intellect)"],
+        "Field Medic": ["Medicine (Intellect)", "Science (Intellect)", "Recovery (Vigor)", "Endurance (Vigor)", "Perception (Awareness)", "Concentration (Will)", "Searching (Awareness)", "Fortitude (Vigor)", "Survival (Vigor)", "First Aid (Medicine)"],
+        "Technician": ["Electronics (Technology)", "Systems Engineering (Technology)", "Engineering (Intellect)", "Computer Science (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Technical Lore (Intellect)", "Concentration (Will)", "Robotics (Technology)", "Repair (Vigor)"],
+        "Researcher": ["Science (Intellect)", "Investigation (Intellect)", "Technical Lore (Intellect)", "Concentration (Will)", "Languages (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "History (Intellect)", "Computer Science (Intellect)", "Medicine (Intellect)"],
+        "Strategist": ["Tactics (Intellect)", "Leadership (Presence)", "Command (Will)", "History (Intellect)", "Concentration (Will)", "Perception (Awareness)", "Strategy (Intellect)", "Searching (Awareness)", "Languages (Intellect)", "Persuasion (Presence)"],
+        "Doctor": ["Medicine (Intellect)", "Science (Intellect)", "Persuasion (Presence)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Investigation (Intellect)", "Languages (Intellect)", "Endurance (Vigor)", "First Aid (Medicine)"],
+        "Professor": ["History (Intellect)", "Languages (Intellect)", "Persuasion (Presence)", "Technical Lore (Intellect)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Investigation (Intellect)", "Leadership (Presence)", "Science (Intellect)"],
+        "Teacher": ["Persuasion (Presence)", "Languages (Intellect)", "Leadership (Presence)", "Insight (Awareness)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "History (Intellect)", "Etiquette (Presence)", "Inspiration (Presence)"],
+        "Architect": ["Engineering (Intellect)", "Technical Lore (Intellect)", "History (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Languages (Intellect)", "Computer Science (Intellect)", "Investigation (Intellect)", "Feats of Strength (Might)"],
+        "Accountant": ["Investigation (Intellect)", "Computer Science (Intellect)", "Perception (Awareness)", "Concentration (Will)", "Bartering (Presence)", "Searching (Awareness)", "Languages (Intellect)", "Etiquette (Presence)", "History (Intellect)", "Technical Lore (Intellect)"],
+        "Historian": ["History (Intellect)", "Languages (Intellect)", "Investigation (Intellect)", "Insight (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Technical Lore (Intellect)", "Etiquette (Presence)", "Persuasion (Presence)"],
+        "Data Analyst": ["Computer Science (Intellect)", "Investigation (Intellect)", "Technical Lore (Intellect)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Electronics (Technology)", "Languages (Intellect)", "History (Intellect)", "Cipher (Intellect)"],
+        "Research Scientist": ["Science (Intellect)", "Technical Lore (Intellect)", "Investigation (Intellect)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Languages (Intellect)", "Computer Science (Intellect)", "Medicine (Intellect)", "Engineering (Intellect)"],
+        "Medical Researcher": ["Medicine (Intellect)", "Science (Intellect)", "Investigation (Intellect)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Technical Lore (Intellect)", "Languages (Intellect)", "Computer Science (Intellect)", "Fortitude (Vigor)"],
+        "Recon Scout": ["Reconnaissance (Awareness)", "Tracking (Awareness)", "Stealth (Agility)", "Perception (Awareness)", "Searching (Awareness)", "Survival (Vigor)", "Marksmanship (Agility)", "Navigation (Awareness)", "Evasion (Agility)", "Hunting (Awareness)"],
+        "Tracker": ["Tracking (Awareness)", "Hunting (Awareness)", "Survival (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Navigation (Awareness)", "Reconnaissance (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Animal Handling (Awareness)"],
+        "Pathfinder": ["Navigation (Awareness)", "Survival (Vigor)", "Tracking (Awareness)", "Reconnaissance (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Hunting (Awareness)", "Climbing (Athletics)"],
+        "Scout Pilot": ["Aircraft Piloting (Agility)", "Reconnaissance (Awareness)", "Evasion (Agility)", "Navigation (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Searching (Awareness)", "Zero-G Adaptation (Vigor)", "Computer Science (Intellect)", "Combat Focus (Will)"],
+        "Spy": ["Deception (Presence)", "Stealth (Agility)", "Sleight of Hand (Agility)", "Insight (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Persuasion (Presence)", "Evasion (Agility)", "Etiquette (Presence)", "Languages (Intellect)"],
+        "Tracker-Hunter": ["Tracking (Awareness)", "Hunting (Awareness)", "Marksmanship (Agility)", "Survival (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Animal Handling (Awareness)", "Reconnaissance (Awareness)"],
+        "Drone Operator": ["Drone Operations (Awareness)", "Electronics (Technology)", "Computer Science (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Systems Engineering (Technology)", "Concentration (Will)", "Searching (Awareness)", "Navigation (Awareness)", "Reconnaissance (Awareness)"],
+        "Treasure Hunter": ["Searching (Awareness)", "Investigation (Intellect)", "Survival (Vigor)", "Finesse Weapons (Agility)", "Perception (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "History (Intellect)", "Lockpicking (Thievery)", "Stealth (Agility)"],
+        "Ranger": ["Survival (Vigor)", "Tracking (Awareness)", "Marksmanship (Agility)", "Hunting (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Navigation (Awareness)", "Reconnaissance (Awareness)"],
+        "Security Guard": ["Perception (Awareness)", "Intimidation (Might)", "Hand-to-Hand Combat (Might)", "Light Armor (Agility)", "Searching (Awareness)", "Endurance (Vigor)", "Command (Will)", "Athletics (Might)", "Streetwise (Awareness)", "Quick Draw (Agility)"],
+        "Watch Officer": ["Perception (Awareness)", "Insight (Awareness)", "Command (Will)", "Investigation (Intellect)", "Searching (Awareness)", "Persuasion (Presence)", "Tactics (Intellect)", "Streetwise (Awareness)", "Concentration (Will)", "Etiquette (Presence)"],
+        "Surveyor": ["Navigation (Awareness)", "Perception (Awareness)", "Engineering (Intellect)", "Searching (Awareness)", "Survival (Vigor)", "History (Intellect)", "Concentration (Will)", "Endurance (Vigor)", "Technical Lore (Intellect)", "Athletics (Might)"],
+        "Wildlife Specialist": ["Animal Handling (Awareness)", "Hunting (Awareness)", "Survival (Vigor)", "Xenology (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Tracking (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Nature (Intellect)"],
+        "Field Tracker": ["Tracking (Awareness)", "Perception (Awareness)", "Survival (Vigor)", "Hunting (Awareness)", "Searching (Awareness)", "Reconnaissance (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Navigation (Awareness)", "Animal Handling (Awareness)"],
+        "Meteorologist": ["Science (Intellect)", "Navigation (Awareness)", "Perception (Awareness)", "Survival (Vigor)", "Searching (Awareness)", "Concentration (Will)", "Computer Science (Intellect)", "Technical Lore (Intellect)", "History (Intellect)", "Endurance (Vigor)"],
+        "Sensor Operator": ["Threat Detection (Awareness)", "Perception (Awareness)", "Electronics (Technology)", "Computer Science (Intellect)", "Searching (Awareness)", "Concentration (Will)", "Systems Engineering (Technology)", "Technical Lore (Intellect)", "Reconnaissance (Awareness)", "Navigation (Awareness)"],
+        "Traffic Controller": ["Navigation (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Communication (Presence)", "Searching (Awareness)", "Persuasion (Presence)", "Etiquette (Presence)", "Computer Science (Intellect)", "Aircraft Piloting (Agility)", "Ground Vehicles (Agility)"],
+        "Navigator": ["Navigation (Awareness)", "Perception (Awareness)", "Aircraft Piloting (Agility)", "Computer Science (Intellect)", "Searching (Awareness)", "Concentration (Will)", "Zero-G Adaptation (Vigor)", "History (Intellect)", "Technical Lore (Intellect)", "Endurance (Vigor)"],
+        "Wildlife Handler": ["Animal Handling (Awareness)", "Insight (Awareness)", "Survival (Vigor)", "Endurance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Persuasion (Presence)", "Inspiration (Presence)", "Nature (Intellect)"],
+        "Diplomat": ["Diplomacy (Presence)", "Persuasion (Presence)", "Etiquette (Presence)", "Languages (Intellect)", "Deception (Presence)", "Insight (Awareness)", "Leadership (Presence)", "Bartering (Presence)", "History (Intellect)", "Concentration (Will)"],
+        "Captain": ["Leadership (Presence)", "Command (Will)", "Tactics (Intellect)", "Persuasion (Presence)", "Navigation (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Inspiration (Presence)", "Etiquette (Presence)", "Athletics (Might)"],
+        "Smuggler": ["Deception (Presence)", "Stealth (Agility)", "Streetwise (Awareness)", "Aircraft Piloting (Agility)", "Perception (Awareness)", "Searching (Awareness)", "Bartering (Presence)", "Sleight of Hand (Agility)", "Evasion (Agility)", "Quick Draw (Agility)"],
+        "Merchant Adventurer": ["Bartering (Presence)", "Persuasion (Presence)", "Survival (Vigor)", "Navigation (Awareness)", "Etiquette (Presence)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Streetwise (Awareness)"],
+        "Negotiator": ["Diplomacy (Presence)", "Persuasion (Presence)", "Insight (Awareness)", "Deception (Presence)", "Etiquette (Presence)", "Bartering (Presence)", "Concentration (Will)", "Languages (Intellect)", "Leadership (Presence)", "Searching (Awareness)"],
+        "Spy Master": ["Deception (Presence)", "Insight (Awareness)", "Leadership (Presence)", "Investigation (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Stealth (Agility)", "Persuasion (Presence)", "Command (Will)", "Concentration (Will)"],
+        "Rebel Leader": ["Leadership (Presence)", "Inspiration (Presence)", "Tactics (Intellect)", "Command (Will)", "Persuasion (Presence)", "Intimidation (Might)", "Survival (Vigor)", "Athletics (Might)", "Perception (Awareness)", "Concentration (Will)"],
+        "Corporate Operative": ["Deception (Presence)", "Hacking (Technology)", "Persuasion (Presence)", "Stealth (Agility)", "Insight (Awareness)", "Etiquette (Presence)", "Bartering (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Computer Science (Intellect)"],
+        "Gunslinger Diplomat": ["Persuasion (Presence)", "Marksmanship (Agility)", "Quick Draw (Agility)", "Etiquette (Presence)", "Deception (Presence)", "Perception (Awareness)", "Bartering (Presence)", "Insight (Awareness)", "Light Armor (Agility)", "Concentration (Will)"],
+        "Celebrity Adventurer": ["Performance (Presence)", "Inspiration (Presence)", "Persuasion (Presence)", "Acrobatics (Agility)", "Etiquette (Presence)", "Deception (Presence)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Bartering (Presence)"],
+        "Merchant": ["Bartering (Presence)", "Persuasion (Presence)", "Etiquette (Presence)", "Languages (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Streetwise (Awareness)", "Concentration (Will)", "Investigation (Intellect)", "Leadership (Presence)"],
+        "Politician": ["Persuasion (Presence)", "Leadership (Presence)", "Deception (Presence)", "Etiquette (Presence)", "Bartering (Presence)", "Inspiration (Presence)", "Concentration (Will)", "Languages (Intellect)", "Investigation (Intellect)", "Insight (Awareness)"],
+        "Corporate Executive": ["Leadership (Presence)", "Persuasion (Presence)", "Bartering (Presence)", "Command (Will)", "Etiquette (Presence)", "Concentration (Will)", "Investigation (Intellect)", "Searching (Awareness)", "Languages (Intellect)", "Insight (Awareness)"],
+        "Bureaucrat": ["Etiquette (Presence)", "Investigation (Intellect)", "Languages (Intellect)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Bartering (Presence)", "Persuasion (Presence)", "Deception (Presence)", "History (Intellect)"],
+        "Entertainer": ["Performance (Presence)", "Deception (Presence)", "Seduction (Presence)", "Inspiration (Presence)", "Etiquette (Presence)", "Persuasion (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Acrobatics (Agility)", "Sleight of Hand (Agility)"],
+        "Actor": ["Performance (Presence)", "Deception (Presence)", "Persuasion (Presence)", "Etiquette (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Inspiration (Presence)", "Seduction (Presence)", "Languages (Intellect)"],
+        "Journalist": ["Investigation (Intellect)", "Persuasion (Presence)", "Perception (Awareness)", "Languages (Intellect)", "Searching (Awareness)", "Deception (Presence)", "History (Intellect)", "Concentration (Will)", "Insight (Awareness)", "Streetwise (Awareness)"],
+        "Public Relations Officer": ["Persuasion (Presence)", "Etiquette (Presence)", "Performance (Presence)", "Deception (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Inspiration (Presence)", "Languages (Intellect)", "Bartering (Presence)", "Concentration (Will)"],
+        "Corporate Negotiator": ["Diplomacy (Presence)", "Bartering (Presence)", "Persuasion (Presence)", "Insight (Awareness)", "Etiquette (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Deception (Presence)", "Languages (Intellect)"],
+        "Media Personality": ["Performance (Presence)", "Inspiration (Presence)", "Persuasion (Presence)", "Etiquette (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Deception (Presence)", "Seduction (Presence)", "Bartering (Presence)", "Concentration (Will)"],
+        "Special Forces Operator": ["Tactics (Intellect)", "Stealth (Agility)", "Marksmanship (Agility)", "Hand-to-Hand Combat (Might)", "Perception (Awareness)", "Searching (Awareness)", "Heavy Armor (Might)", "Evasion (Agility)", "Endurance (Vigor)", "Command (Will)"],
+        "Commando": ["Hand-to-Hand Combat (Might)", "Heavy Weapons (Might)", "Stealth (Agility)", "Demolitions (Might)", "Athletics (Might)", "Perception (Awareness)", "Searching (Awareness)", "Fortitude (Vigor)", "Heavy Armor (Might)", "Quick Draw (Agility)"],
+        "Inquisitor": ["Investigation (Intellect)", "Insight (Awareness)", "Intimidation (Might)", "Mental Defense (Will)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Command (Will)", "Deception (Presence)", "Faith (Will)"],
+        "Security Officer": ["Perception (Awareness)", "Hand-to-Hand Combat (Might)", "Light Armor (Agility)", "Command (Will)", "Searching (Awareness)", "Intimidation (Might)", "Athletics (Might)", "Endurance (Vigor)", "Streetwise (Awareness)", "Quick Draw (Agility)"],
+        "Military Officer": ["Command (Will)", "Leadership (Presence)", "Tactics (Intellect)", "History (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Inspiration (Presence)", "Athletics (Might)", "Endurance (Vigor)"],
+        "Resistance Fighter": ["Survival (Vigor)", "Marksmanship (Agility)", "Stealth (Agility)", "Resolve (Will)", "Athletics (Might)", "Endurance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Light Armor (Agility)", "Intimidation (Might)"],
+        "Bodyguard": ["Perception (Awareness)", "Hand-to-Hand Combat (Might)", "Light Armor (Agility)", "Endurance (Vigor)", "Searching (Awareness)", "Athletics (Might)", "Command (Will)", "Intimidation (Might)", "Quick Draw (Agility)", "Fortitude (Vigor)"],
+        "Interrogator": ["Insight (Awareness)", "Intimidation (Might)", "Deception (Presence)", "Investigation (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Command (Will)", "Persuasion (Presence)", "Mental Defense (Will)"],
+        "Combat Leader": ["Leadership (Presence)", "Command (Will)", "Tactics (Intellect)", "Inspiration (Presence)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Concentration (Will)", "History (Intellect)"],
+        "Espionage Agent": ["Stealth (Agility)", "Deception (Presence)", "Sleight of Hand (Agility)", "Hacking (Technology)", "Perception (Awareness)", "Searching (Awareness)", "Insight (Awareness)", "Evasion (Agility)", "Computer Science (Intellect)", "Searching (Awareness)"],
+        "Police Officer": ["Investigation (Intellect)", "Perception (Awareness)", "Hand-to-Hand Combat (Might)", "Streetwise (Awareness)", "Searching (Awareness)", "Command (Will)", "Intimidation (Might)", "Athletics (Might)", "Light Armor (Agility)", "Quick Draw (Agility)"],
+        "Judge": ["Insight (Awareness)", "Command (Will)", "Investigation (Intellect)", "Persuasion (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "History (Intellect)", "Etiquette (Presence)", "Languages (Intellect)"],
+        "Prison Warden": ["Intimidation (Might)", "Command (Will)", "Perception (Awareness)", "Discipline (Will)", "Searching (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Concentration (Will)", "Hand-to-Hand Combat (Might)", "Fortitude (Vigor)"],
+        "Security Commander": ["Command (Will)", "Leadership (Presence)", "Tactics (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Inspiration (Presence)", "Athletics (Might)", "Endurance (Vigor)", "History (Intellect)"],
+        "Counselor": ["Insight (Awareness)", "Persuasion (Presence)", "Concentration (Will)", "Medicine (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Deception (Presence)", "Languages (Intellect)", "Etiquette (Presence)", "Leadership (Presence)"],
+        "Chaplain": ["Faith (Will)", "Persuasion (Presence)", "Insight (Awareness)", "Meditation (Will)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Inspiration (Presence)", "History (Intellect)", "Command (Will)"],
+        "Mediator": ["Diplomacy (Presence)", "Insight (Awareness)", "Persuasion (Presence)", "Etiquette (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Deception (Presence)", "Languages (Intellect)", "Bartering (Presence)"],
+        "Government Official": ["Etiquette (Presence)", "Persuasion (Presence)", "Command (Will)", "Investigation (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Bartering (Presence)", "History (Intellect)", "Languages (Intellect)"],
+        "Intelligence Officer": ["Investigation (Intellect)", "Insight (Awareness)", "Deception (Presence)", "Computer Science (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Languages (Intellect)", "Tactics (Intellect)", "History (Intellect)"],
+        "Corrections Officer": ["Intimidation (Might)", "Perception (Awareness)", "Discipline (Will)", "Hand-to-Hand Combat (Might)", "Searching (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Concentration (Will)", "Fortitude (Vigor)", "Command (Will)"],
+        "Netrunner": ["Hacking (Technology)", "Computer Science (Intellect)", "Electronics (Technology)", "Electronic Warfare (Technology)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Artificial Intelligence (Technology)", "Systems Engineering (Technology)", "Stealth (Agility)"],
+        "Cyberneticist": ["Cybernetics (Technology)", "Medicine (Intellect)", "Robotics (Technology)", "Electronics (Technology)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Science (Intellect)", "Systems Engineering (Technology)", "Finesse Weapons (Agility)"],
+        "Robotics Engineer": ["Robotics (Technology)", "Engineering (Intellect)", "Systems Engineering (Technology)", "Electronics (Technology)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Computer Science (Intellect)", "Technical Lore (Intellect)", "Repair (Vigor)"],
+        "Tech Specialist": ["Electronics (Technology)", "Systems Engineering (Technology)", "Engineering (Intellect)", "Computer Science (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Robotics (Technology)", "Hacking (Technology)", "Technical Lore (Intellect)"],
+        "Electronic Warfare Specialist": ["Electronic Warfare (Technology)", "Hacking (Technology)", "Computer Science (Intellect)", "Threat Detection (Awareness)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Electronics (Technology)", "Systems Engineering (Technology)", "Stealth (Agility)"],
+        "AI Specialist": ["Artificial Intelligence (Technology)", "Computer Science (Intellect)", "Hacking (Technology)", "Systems Engineering (Technology)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Electronics (Technology)", "Technical Lore (Intellect)", "Cybernetics (Technology)"],
+        "Weapons Engineer": ["Advanced Weapons (Technology)", "Engineering (Intellect)", "Electronics (Technology)", "Heavy Weapons (Might)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Systems Engineering (Technology)", "Technical Lore (Intellect)", "Demolitions (Might)"],
+        "Systems Engineer": ["Systems Engineering (Technology)", "Engineering (Intellect)", "Electronics (Technology)", "Computer Science (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Technical Lore (Intellect)", "Robotics (Technology)", "Repair (Vigor)"],
+        "Alien Tech Specialist": ["Alien Technology (Technology)", "Xenology (Intellect)", "Engineering (Intellect)", "Technical Lore (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Systems Engineering (Technology)", "History (Intellect)", "Science (Intellect)"],
+        "Cyber Operative": ["Cybernetics (Technology)", "Hacking (Technology)", "Stealth (Agility)", "Electronic Warfare (Technology)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Computer Science (Intellect)", "Sleight of Hand (Agility)", "Evasion (Agility)"],
+        "Computer Programmer": ["Computer Science (Intellect)", "Electronics (Technology)", "Hacking (Technology)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Technical Lore (Intellect)", "Systems Engineering (Technology)", "Artificial Intelligence (Technology)", "Cipher (Intellect)"],
+        "Network Engineer": ["Computer Science (Intellect)", "Electronics (Technology)", "Systems Engineering (Technology)", "Technical Lore (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Hacking (Technology)", "Electronic Warfare (Technology)"],
+        "Cybernetic Surgeon": ["Cybernetics (Technology)", "Medicine (Intellect)", "Science (Intellect)", "Finesse Weapons (Agility)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Robotics (Technology)", "Systems Engineering (Technology)", "First Aid (Medicine)"],
+        "Robotics Technician": ["Robotics (Technology)", "Electronics (Technology)", "Engineering (Intellect)", "Systems Engineering (Technology)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Computer Science (Intellect)", "Technical Lore (Intellect)", "Repair (Vigor)"],
+        "Electronics Technician": ["Electronics (Technology)", "Engineering (Intellect)", "Systems Engineering (Technology)", "Technical Lore (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Computer Science (Intellect)", "Robotics (Technology)", "Repair (Vigor)"],
+        "AI Programmer": ["Artificial Intelligence (Technology)", "Computer Science (Intellect)", "Systems Engineering (Technology)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Hacking (Technology)", "Technical Lore (Intellect)", "Electronics (Technology)", "Cybernetics (Technology)"],
+        "Systems Administrator": ["Computer Science (Intellect)", "Systems Engineering (Technology)", "Electronics (Technology)", "Discipline (Will)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Technical Lore (Intellect)", "Hacking (Technology)", "Command (Will)"],
+        "Data Scientist": ["Computer Science (Intellect)", "Investigation (Intellect)", "Technical Lore (Intellect)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Science (Intellect)", "Languages (Intellect)", "History (Intellect)", "Cipher (Intellect)"],
+        "Communications Technician": ["Electronics (Technology)", "Computer Science (Intellect)", "Technical Lore (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Systems Engineering (Technology)", "Navigation (Awareness)", "Reconnaissance (Awareness)", "Cipher (Intellect)"],
+        "Research Engineer": ["Engineering (Intellect)", "Science (Intellect)", "Technical Lore (Intellect)", "Systems Engineering (Technology)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Computer Science (Intellect)", "Electronics (Technology)", "Robotics (Technology)"],
+        "Warrior": ["Athletics (Might)", "Hand-to-Hand Combat (Might)", "Heavy Armor (Might)", "Power Strike (Might)", "Endurance (Vigor)", "Fortitude (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Light Armor (Agility)", "Tactics (Intellect)"],
+        "Berserker": ["Power Strike (Might)", "Fortitude (Vigor)", "Intimidation (Might)", "Athletics (Might)", "Endurance (Vigor)", "Pain Tolerance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Hand-to-Hand Combat (Might)", "Combat Focus (Will)"],
+        "Knight": ["Heavy Armor (Might)", "Command (Will)", "Hand-to-Hand Combat (Might)", "Etiquette (Presence)", "Athletics (Might)", "Perception (Awareness)", "Searching (Awareness)", "Endurance (Vigor)", "Leadership (Presence)", "Tactics (Intellect)"],
+        "Barbarian": ["Athletics (Might)", "Endurance (Vigor)", "Fortitude (Vigor)", "Intimidation (Might)", "Pain Tolerance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Power Strike (Might)", "Survival (Vigor)", "Hand-to-Hand Combat (Might)"],
+        "Pit Fighter": ["Hand-to-Hand Combat (Might)", "Grappling (Might)", "Pain Tolerance (Vigor)", "Brawling (Might)", "Athletics (Might)", "Fortitude (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Light Armor (Agility)", "Intimidation (Might)"],
+        "Weapon Master": ["Hand-to-Hand Combat (Might)", "Finesse Weapons (Agility)", "Quick Draw (Agility)", "Tactics (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Command (Will)", "Combat Focus (Will)"],
+        "Shield Guardian": ["Heavy Armor (Might)", "Shields (Vigor)", "Endurance (Vigor)", "Discipline (Will)", "Fortitude (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Command (Will)", "Concentration (Will)"],
+        "Monster Slayer": ["Tracking (Awareness)", "Hunting (Awareness)", "Marksmanship (Agility)", "Survival (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Threat Detection (Awareness)", "Hand-to-Hand Combat (Might)"],
+        "Siege Warrior": ["Siegecraft (Might)", "Demolitions (Might)", "Engineering (Intellect)", "Heavy Weapons (Might)", "Athletics (Might)", "Fortitude (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Endurance (Vigor)", "Tactics (Intellect)"],
+        "Champion": ["Leadership (Presence)", "Inspiration (Presence)", "Hand-to-Hand Combat (Might)", "Command (Will)", "Athletics (Might)", "Perception (Awareness)", "Searching (Awareness)", "Endurance (Vigor)", "Tactics (Intellect)", "Fortitude (Vigor)"],
+        "Blacksmith": ["Engineering (Intellect)", "Feats of Strength (Might)", "Crafting (Intellect)", "Endurance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Technical Lore (Intellect)", "Athletics (Might)", "Fortitude (Vigor)", "Bartering (Presence)"],
+        "Stone Mason": ["Engineering (Intellect)", "Feats of Strength (Might)", "Endurance (Vigor)", "History (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Technical Lore (Intellect)", "Athletics (Might)", "Fortitude (Vigor)", "Bartering (Presence)"],
+        "Lumberjack": ["Athletics (Might)", "Endurance (Vigor)", "Survival (Vigor)", "Foraging (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Feats of Strength (Might)", "Fortitude (Vigor)", "Navigation (Awareness)", "Bartering (Presence)"],
+        "Laborer": ["Athletics (Might)", "Endurance (Vigor)", "Feats of Strength (Might)", "Foraging (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Fortitude (Vigor)", "Bartering (Presence)", "Streetwise (Awareness)", "Navigation (Awareness)"],
+        "Armorer": ["Engineering (Intellect)", "Feats of Strength (Might)", "Crafting (Intellect)", "Technical Lore (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Fortitude (Vigor)", "Bartering (Presence)"],
+        "Stablemaster": ["Animal Handling (Awareness)", "Riding (Agility)", "Survival (Vigor)", "Endurance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Bartering (Presence)", "Nature (Intellect)", "Fortitude (Vigor)"],
+        "Carpenter": ["Engineering (Intellect)", "Crafting (Intellect)", "Perception (Awareness)", "Technical Lore (Intellect)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Fortitude (Vigor)", "Bartering (Presence)", "Feats of Strength (Might)"],
+        "Teamster": ["Riding (Agility)", "Ground Vehicles (Agility)", "Navigation (Awareness)", "Endurance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Bartering (Presence)", "Streetwise (Awareness)", "Fortitude (Vigor)"],
+        "Ranger": ["Survival (Vigor)", "Tracking (Awareness)", "Archery (Agility)", "Hunting (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Navigation (Awareness)", "Reconnaissance (Awareness)"],
+        "Rogue": ["Stealth (Agility)", "Sleight of Hand (Agility)", "Thievery (Agility)", "Deception (Presence)", "Perception (Awareness)", "Searching (Awareness)", "Evasion (Agility)", "Acrobatics (Agility)", "Streetwise (Awareness)", "Insight (Awareness)"],
+        "Assassin": ["Stealth (Agility)", "Finesse Weapons (Agility)", "Sleight of Hand (Agility)", "Deception (Presence)", "Perception (Awareness)", "Searching (Awareness)", "Quick Draw (Agility)", "Evasion (Agility)", "Insight (Awareness)", "Poison Lore (Alchemy)"],
+        "Archer": ["Archery (Agility)", "Marksmanship (Agility)", "Perception (Awareness)", "Evasion (Agility)", "Searching (Awareness)", "Tracking (Awareness)", "Concentration (Will)", "Stealth (Agility)", "Quick Draw (Agility)", "Athletics (Might)"],
+        "Swashbuckler": ["Finesse Weapons (Agility)", "Acrobatics (Agility)", "Quick Draw (Agility)", "Performance (Presence)", "Perception (Awareness)", "Searching (Awareness)", "Evasion (Agility)", "Deception (Presence)", "Insight (Awareness)", "Light Armor (Agility)"],
+        "Duelist": ["Finesse Weapons (Agility)", "Acrobatics (Agility)", "Quick Draw (Agility)", "Insight (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Evasion (Agility)", "Concentration (Will)", "Deception (Presence)", "Light Armor (Agility)"],
+        "Acrobat": ["Acrobatics (Agility)", "Sleight of Hand (Agility)", "Performance (Presence)", "Evasion (Agility)", "Perception (Awareness)", "Searching (Awareness)", "Stealth (Agility)", "Concentration (Will)", "Athletics (Might)", "Endurance (Vigor)"],
+        "Thief": ["Thievery (Agility)", "Stealth (Agility)", "Sleight of Hand (Agility)", "Streetwise (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Evasion (Agility)", "Deception (Presence)", "Insight (Awareness)", "Acrobatics (Agility)"],
+        "Mounted Scout": ["Riding (Agility)", "Tracking (Awareness)", "Reconnaissance (Awareness)", "Survival (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Navigation (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Hunting (Awareness)"],
+        "Fencer": ["Finesse Weapons (Agility)", "Acrobatics (Agility)", "Insight (Awareness)", "Quick Draw (Agility)", "Perception (Awareness)", "Searching (Awareness)", "Evasion (Agility)", "Concentration (Will)", "Deception (Presence)", "Light Armor (Agility)"],
+        "Juggler": ["Sleight of Hand (Agility)", "Acrobatics (Agility)", "Performance (Presence)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Evasion (Agility)", "Deception (Presence)", "Endurance (Vigor)", "Athletics (Might)"],
+        "Falconer": ["Animal Handling (Awareness)", "Hunting (Awareness)", "Perception (Awareness)", "Survival (Vigor)", "Searching (Awareness)", "Tracking (Awareness)", "Navigation (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Nature (Intellect)"],
+        "Trapper": ["Survival (Vigor)", "Tracking (Awareness)", "Searching (Awareness)", "Hunting (Awareness)", "Perception (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Navigation (Awareness)", "Reconnaissance (Awareness)", "Animal Handling (Awareness)"],
+        "Sailor": ["Navigation (Awareness)", "Swimming (Vigor)", "Zero-G Adaptation (Vigor)", "Endurance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Fortitude (Vigor)", "Streetwise (Awareness)", "Bartering (Presence)"],
+        "Stablehand": ["Animal Handling (Awareness)", "Endurance (Vigor)", "Foraging (Vigor)", "Survival (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Fortitude (Vigor)", "Bartering (Presence)", "Nature (Intellect)"],
+        "Locksmith": ["Thievery (Agility)", "Searching (Awareness)", "Engineering (Intellect)", "Sleight of Hand (Agility)", "Perception (Awareness)", "Concentration (Will)", "Technical Lore (Intellect)", "Stealth (Agility)", "Deception (Presence)", "Insight (Awareness)"],
+        "Messenger Rider": ["Riding (Agility)", "Endurance (Vigor)", "Navigation (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Fortitude (Vigor)", "Streetwise (Awareness)", "Concentration (Will)", "Quick Draw (Agility)"],
+        "Wilderness Ranger": ["Survival (Vigor)", "Tracking (Awareness)", "Archery (Agility)", "Hunting (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Navigation (Awareness)", "Reconnaissance (Awareness)"],
+        "Mountain Climber": ["Athletics (Might)", "Survival (Vigor)", "Endurance (Vigor)", "Fortitude (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Feats of Strength (Might)", "Navigation (Awareness)", "Concentration (Will)", "Reconnaissance (Awareness)"],
+        "Desert Wanderer": ["Survival (Vigor)", "Heat Resistance (Vigor)", "Navigation (Awareness)", "Endurance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Fortitude (Vigor)", "Athletics (Might)", "Concentration (Will)", "Reconnaissance (Awareness)"],
+        "Swamp Stalker": ["Survival (Vigor)", "Stealth (Agility)", "Cold Resistance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Tracking (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Hunting (Awareness)", "Reconnaissance (Awareness)"],
+        "Undead Hunter": ["Faith (Will)", "Occultism (Mysticism)", "Threat Detection (Awareness)", "Combat Focus (Will)", "Perception (Awareness)", "Searching (Awareness)", "Investigation (Intellect)", "Athletics (Might)", "Endurance (Vigor)", "Command (Will)"],
+        "Plague Survivor": ["Fortitude (Vigor)", "Survival (Vigor)", "Medicine (Intellect)", "Resistance (Will)", "Perception (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Endurance (Vigor)", "Athletics (Might)", "First Aid (Medicine)"],
+        "Deep Delver": ["Survival (Vigor)", "Fortitude (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Feats of Strength (Might)", "Navigation (Awareness)", "Technical Lore (Intellect)", "Reconnaissance (Awareness)"],
+        "Wilderness Warrior": ["Survival (Vigor)", "Athletics (Might)", "Light Armor (Agility)", "Endurance (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Fortitude (Vigor)", "Hand-to-Hand Combat (Might)", "Intimidation (Might)", "Hunting (Awareness)"],
+        "Shepherd": ["Animal Handling (Awareness)", "Survival (Vigor)", "Perception (Awareness)", "Endurance (Vigor)", "Searching (Awareness)", "Athletics (Might)", "Fortitude (Vigor)", "Bartering (Presence)", "Nature (Intellect)", "Navigation (Awareness)"],
+        "Fisherman": ["Survival (Vigor)", "Perception (Awareness)", "Swimming (Vigor)", "Endurance (Vigor)", "Searching (Awareness)", "Athletics (Might)", "Fortitude (Vigor)", "Navigation (Awareness)", "Foraging (Vigor)", "Bartering (Presence)"],
+        "Hunter": ["Hunting (Awareness)", "Tracking (Awareness)", "Survival (Vigor)", "Archery (Agility)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Navigation (Awareness)", "Reconnaissance (Awareness)"],
+        "Woodsman": ["Survival (Vigor)", "Athletics (Might)", "Foraging (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Endurance (Vigor)", "Feats of Strength (Might)", "Fortitude (Vigor)", "Navigation (Awareness)", "Bartering (Presence)"],
+        "Herder": ["Animal Handling (Awareness)", "Endurance (Vigor)", "Survival (Vigor)", "Navigation (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Fortitude (Vigor)", "Bartering (Presence)", "Nature (Intellect)"],
+        "Gardener": ["Nature (Intellect)", "Foraging (Vigor)", "Endurance (Vigor)", "Alchemy (Intellect)", "Perception (Awareness)", "Searching (Awareness)", "Survival (Vigor)", "Athletics (Might)", "Medicine (Intellect)", "Bartering (Presence)"],
+        "Herbalist": ["Nature (Intellect)", "Medicine (Intellect)", "Alchemy (Intellect)", "Foraging (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Survival (Vigor)", "Endurance (Vigor)", "Science (Intellect)", "Technical Lore (Intellect)"],
+        "Prospector": ["Survival (Vigor)", "Fortitude (Vigor)", "Searching (Awareness)", "Perception (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Feats of Strength (Might)", "Navigation (Awareness)", "Technical Lore (Intellect)", "Bartering (Presence)"],
+        "Caravan Worker": ["Endurance (Vigor)", "Athletics (Might)", "Navigation (Awareness)", "Bartering (Presence)", "Perception (Awareness)", "Searching (Awareness)", "Fortitude (Vigor)", "Streetwise (Awareness)", "Ground Vehicles (Agility)", "Foraging (Vigor)"],
+        "Wizard": ["Arcana (Intellect)", "Spellcraft (Mysticism)", "Magical Theory (Mysticism)", "History (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Languages (Intellect)", "Investigation (Intellect)", "Ritual Magic (Mysticism)"],
+        "Alchemist": ["Alchemy (Intellect)", "Science (Intellect)", "Medicine (Intellect)", "Magical Theory (Mysticism)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Technical Lore (Intellect)", "Nature (Intellect)", "Searching (Awareness)"],
+        "Scholar": ["History (Intellect)", "Languages (Intellect)", "Investigation (Intellect)", "Lore (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Technical Lore (Intellect)", "Etiquette (Presence)", "Persuasion (Presence)"],
+        "Battle Mage": ["Spellcraft (Mysticism)", "Tactics (Intellect)", "Magical Theory (Mysticism)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Combat Focus (Will)", "Command (Will)", "Arcana (Intellect)", "History (Intellect)"],
+        "Sage": ["History (Intellect)", "Insight (Awareness)", "Languages (Intellect)", "Lore (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Investigation (Intellect)", "Etiquette (Presence)", "Persuasion (Presence)"],
+        "Battle Scholar": ["Tactics (Intellect)", "History (Intellect)", "Strategy (Intellect)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Languages (Intellect)", "Leadership (Presence)", "Command (Will)", "Investigation (Intellect)"],
+        "Healer": ["Medicine (Intellect)", "Science (Intellect)", "Recovery (Vigor)", "Faith (Will)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "First Aid (Medicine)", "Survival (Vigor)", "Endurance (Vigor)"],
+        "Scribe": ["Languages (Intellect)", "History (Intellect)", "Concentration (Will)", "Investigation (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Technical Lore (Intellect)", "Etiquette (Presence)", "Persuasion (Presence)", "Lore (Intellect)"],
+        "Librarian": ["History (Intellect)", "Languages (Intellect)", "Searching (Awareness)", "Investigation (Intellect)", "Perception (Awareness)", "Concentration (Will)", "Technical Lore (Intellect)", "Etiquette (Presence)", "Persuasion (Presence)", "Lore (Intellect)"],
+        "Physician": ["Medicine (Intellect)", "Science (Intellect)", "Recovery (Vigor)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "First Aid (Medicine)", "Endurance (Vigor)", "Survival (Vigor)", "Investigation (Intellect)"],
+        "Apothecary": ["Alchemy (Intellect)", "Medicine (Intellect)", "Nature (Intellect)", "Science (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Technical Lore (Intellect)", "Foraging (Vigor)", "Bartering (Presence)"],
+        "Cartographer": ["Navigation (Awareness)", "Perception (Awareness)", "History (Intellect)", "Searching (Awareness)", "Concentration (Will)", "Engineering (Intellect)", "Technical Lore (Intellect)", "Languages (Intellect)", "Survival (Vigor)", "Endurance (Vigor)"],
+        "Court Scholar": ["History (Intellect)", "Languages (Intellect)", "Etiquette (Presence)", "Insight (Awareness)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Investigation (Intellect)", "Persuasion (Presence)", "Lore (Intellect)"],
+        "Monster Hunter": ["Hunting (Awareness)", "Tracking (Awareness)", "Survival (Vigor)", "Threat Detection (Awareness)", "Searching (Awareness)", "Perception (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Marksmanship (Agility)", "Hand-to-Hand Combat (Might)"],
+        "Detective": ["Investigation (Intellect)", "Perception (Awareness)", "Insight (Awareness)", "Searching (Awareness)", "Languages (Intellect)", "Deception (Presence)", "Persuasion (Presence)", "Concentration (Will)", "Streetwise (Awareness)", "Law (Intellect)"],
+        "Beast Hunter": ["Hunting (Awareness)", "Tracking (Awareness)", "Survival (Vigor)", "Animal Handling (Awareness)", "Searching (Awareness)", "Perception (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Marksmanship (Agility)", "Nature (Intellect)"],
+        "Lookout": ["Perception (Awareness)", "Threat Detection (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Navigation (Awareness)", "Reconnaissance (Awareness)", "Endurance (Vigor)", "Athletics (Might)", "Hunting (Awareness)", "Tracking (Awareness)"],
+        "Gamekeeper": ["Animal Handling (Awareness)", "Hunting (Awareness)", "Tracking (Awareness)", "Survival (Vigor)", "Searching (Awareness)", "Perception (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Nature (Intellect)", "Navigation (Awareness)"],
+        "Scoutmaster": ["Leadership (Presence)", "Reconnaissance (Awareness)", "Survival (Vigor)", "Navigation (Awareness)", "Searching (Awareness)", "Perception (Awareness)", "Tracking (Awareness)", "Command (Will)", "Athletics (Might)", "Endurance (Vigor)"],
+        "Bailiff": ["Investigation (Intellect)", "Command (Will)", "Perception (Awareness)", "Intimidation (Might)", "Searching (Awareness)", "Concentration (Will)", "Persuasion (Presence)", "Athletics (Might)", "Endurance (Vigor)", "Streetwise (Awareness)"],
+        "Guide": ["Navigation (Awareness)", "Survival (Vigor)", "Perception (Awareness)", "Persuasion (Presence)", "Searching (Awareness)", "Tracking (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Bartering (Presence)", "Nature (Intellect)"],
+        "Watch Captain": ["Command (Will)", "Leadership (Presence)", "Perception (Awareness)", "Tactics (Intellect)", "Searching (Awareness)", "Concentration (Will)", "Athletics (Might)", "Endurance (Vigor)", "History (Intellect)", "Inspiration (Presence)"],
+        "Tracker-Hunter": ["Tracking (Awareness)", "Hunting (Awareness)", "Marksmanship (Agility)", "Survival (Vigor)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Navigation (Awareness)", "Animal Handling (Awareness)"],
+        "Trail Warden": ["Survival (Vigor)", "Tracking (Awareness)", "Navigation (Awareness)", "Reconnaissance (Awareness)", "Perception (Awareness)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Hunting (Awareness)", "Animal Handling (Awareness)"],
+        "Noble Adventurer": ["Etiquette (Presence)", "Persuasion (Presence)", "Finesse Weapons (Agility)", "Leadership (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Command (Will)", "Deception (Presence)", "Bartering (Presence)"],
+        "Courtier": ["Etiquette (Presence)", "Persuasion (Presence)", "Deception (Presence)", "Seduction (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Bartering (Presence)", "Languages (Intellect)", "Insight (Awareness)"],
+        "Herald": ["Performance (Presence)", "Languages (Intellect)", "Etiquette (Presence)", "Persuasion (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Inspiration (Presence)", "History (Intellect)", "Command (Will)"],
+        "Charismatic Hero": ["Inspiration (Presence)", "Leadership (Presence)", "Persuasion (Presence)", "Performance (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Command (Will)", "Deception (Presence)", "Etiquette (Presence)"],
+        "Court Official": ["Etiquette (Presence)", "Investigation (Intellect)", "Languages (Intellect)", "Command (Will)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Bartering (Presence)", "Persuasion (Presence)", "History (Intellect)"],
+        "Innkeeper": ["Bartering (Presence)", "Persuasion (Presence)", "Etiquette (Presence)", "Perception (Awareness)", "Searching (Awareness)", "Concentration (Will)", "Endurance (Vigor)", "Athletics (Might)", "Streetwise (Awareness)", "Deception (Presence)"],
+        "Guildmaster": ["Leadership (Presence)", "Bartering (Presence)", "Command (Will)", "Persuasion (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Investigation (Intellect)", "Etiquette (Presence)", "Inspiration (Presence)"],
+        "Public Speaker": ["Performance (Presence)", "Persuasion (Presence)", "Inspiration (Presence)", "Languages (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Etiquette (Presence)", "Deception (Presence)", "Leadership (Presence)"],
+        "Matchmaker": ["Insight (Awareness)", "Persuasion (Presence)", "Deception (Presence)", "Etiquette (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Bartering (Presence)", "Languages (Intellect)", "Leadership (Presence)"],
+        "Crusader": ["Heavy Armor (Might)", "Faith (Will)", "Command (Will)", "Power Strike (Might)", "Searching (Awareness)", "Perception (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Fortitude (Vigor)", "Inspiration (Presence)"],
+        "Guardian": ["Heavy Armor (Might)", "Perception (Awareness)", "Discipline (Will)", "Hand-to-Hand Combat (Might)", "Searching (Awareness)", "Athletics (Might)", "Endurance (Vigor)", "Fortitude (Vigor)", "Concentration (Will)", "Command (Will)"],
+        "Battle Priest": ["Faith (Will)", "Hand-to-Hand Combat (Might)", "Medicine (Intellect)", "Command (Will)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Inspiration (Presence)", "Athletics (Might)", "Endurance (Vigor)"],
+        "Mentalist": ["Mental Defense (Will)", "Concentration (Will)", "Insight (Awareness)", "Meditation (Will)", "Searching (Awareness)", "Perception (Awareness)", "Discipline (Will)", "Resolve (Will)", "Deception (Presence)", "Persuasion (Presence)"],
+        "Magistrate": ["Investigation (Intellect)", "Command (Will)", "Languages (Intellect)", "Etiquette (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Persuasion (Presence)", "History (Intellect)", "Law (Intellect)"],
+        "Sorcerer": ["Spellcraft (Mysticism)", "Magical Theory (Mysticism)", "Concentration (Will)", "Ritual Magic (Mysticism)", "Searching (Awareness)", "Perception (Awareness)", "Arcana (Intellect)", "Divine (Mysticism)", "Inspiration (Presence)", "Resolve (Will)"],
+        "Necromancer": ["Necromancy (Mysticism)", "Occultism (Mysticism)", "Spirit Lore (Mysticism)", "Magical Theory (Mysticism)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Investigation (Intellect)", "History (Intellect)", "Resolve (Will)"],
+        "Summoner": ["Summoning (Mysticism)", "Ritual Magic (Mysticism)", "Magical Theory (Mysticism)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Arcana (Intellect)", "Resolve (Will)", "Inspiration (Presence)", "Faith (Will)"],
+        "Diviner": ["Divination (Mysticism)", "Insight (Awareness)", "Perception (Awareness)", "Magical Theory (Mysticism)", "Searching (Awareness)", "Concentration (Will)", "Investigation (Intellect)", "Languages (Intellect)", "History (Intellect)", "Resolve (Will)"],
+        "Enchanter": ["Enchanting (Mysticism)", "Magical Theory (Mysticism)", "Alchemy (Intellect)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Engineering (Intellect)", "Technical Lore (Intellect)", "Resolve (Will)", "Arcana (Intellect)"],
+        "Spirit Walker": ["Spirit Lore (Mysticism)", "Meditation (Will)", "Survival (Vigor)", "Insight (Awareness)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Athletics (Might)", "Endurance (Vigor)", "Navigation (Awareness)"],
+        "Occultist": ["Occultism (Mysticism)", "Investigation (Intellect)", "History (Intellect)", "Magical Theory (Mysticism)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Languages (Intellect)", "Resolve (Will)", "Spirit Lore (Mysticism)"],
+        "Warlock": ["Occultism (Mysticism)", "Spellcraft (Mysticism)", "Deception (Presence)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Magical Theory (Mysticism)", "Persuasion (Presence)", "Resolve (Will)", "Insight (Awareness)"],
+        "Rune Mage": ["Magical Theory (Mysticism)", "Enchanting (Mysticism)", "Engineering (Intellect)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "Technical Lore (Intellect)", "Arcana (Intellect)", "Resolve (Will)", "History (Intellect)"],
+        "Court Wizard": ["Arcana (Intellect)", "Spellcraft (Mysticism)", "Etiquette (Presence)", "History (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Languages (Intellect)", "Magical Theory (Mysticism)", "Investigation (Intellect)"],
+        "Hedge Witch": ["Medicine (Intellect)", "Nature (Intellect)", "Alchemy (Intellect)", "Ritual Magic (Mysticism)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Foraging (Vigor)", "Survival (Vigor)", "Technical Lore (Intellect)"],
+        "Oracle": ["Divination (Mysticism)", "Insight (Awareness)", "Concentration (Will)", "Perception (Awareness)", "Searching (Awareness)", "Investigation (Intellect)", "Languages (Intellect)", "History (Intellect)", "Resolve (Will)", "Magical Theory (Mysticism)"],
+        "Shrine Keeper": ["Faith (Will)", "Meditation (Will)", "History (Intellect)", "Persuasion (Presence)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Etiquette (Presence)", "Insight (Awareness)", "Leadership (Presence)"],
+        "Rune Smith": ["Enchanting (Mysticism)", "Engineering (Intellect)", "Feats of Strength (Might)", "Technical Lore (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Athletics (Might)", "Fortitude (Vigor)", "Magical Theory (Mysticism)"],
+        "Spirit Medium": ["Spirit Lore (Mysticism)", "Insight (Awareness)", "Concentration (Will)", "Meditation (Will)", "Searching (Awareness)", "Perception (Awareness)", "Deception (Presence)", "Persuasion (Presence)", "Resolve (Will)", "History (Intellect)"],
+        "Astrologer": ["Navigation (Awareness)", "Science (Intellect)", "Divination (Mysticism)", "Concentration (Will)", "Searching (Awareness)", "Perception (Awareness)", "History (Intellect)", "Languages (Intellect)", "Magical Theory (Mysticism)", "Technical Lore (Intellect)"],
+        "Occult Scholar": ["Occultism (Mysticism)", "History (Intellect)", "Investigation (Intellect)", "Languages (Intellect)", "Searching (Awareness)", "Perception (Awareness)", "Concentration (Will)", "Magical Theory (Mysticism)", "Insight (Awareness)", "Resolve (Will)"],
+        "Ritualist": ["Ritual Magic (Mysticism)", "Magical Theory (Mysticism)", "Concentration (Will)", "Faith (Will)", "Searching (Awareness)", "Perception (Awareness)", "Arcana (Intellect)", "Resolve (Will)", "Investigation (Intellect)", "Spirit Lore (Mysticism)"]
+    };
+
+    const dataBySetting = {
+        "sci-fi": {
+            species: Object.keys(baseSpeciesSkills).slice(0, 12),
+            professions: Object.keys(universalProfessionSkills).slice(0, 107),
+            defaultGear: ["Data-Jack", "Utility Rig", "Compact Laser Pistol", "Atmospheric Hazard Field Suit", "Tactical Motion Tracker", "Med-Kit", "Portable Power Cell", "Comlink", "Multitool", "Energy Cells (x3)"]
+        },
+        "fantasy": {
+            species: Object.keys(baseSpeciesSkills).slice(12, 24),
+            professions: Object.keys(universalProfessionSkills).slice(107),
+            defaultGear: ["Masterwork Rapier", "Explorer's Pack", "Alchemist's Satchel", "Climber's Harness", "Magical Focus Crystal", "Heavy Iron Lantern", "Everburn Oil (x2)", "Rations (10 Days)", "Waterskin", "Whetstone"]
+        }
+    };
+
+    const skillsList = [
+        "-- Select Skill --",
+        "Athletics (Might)", "Brawling (Might)", "Hand-to-Hand Combat (Might)", "Heavy Weapons (Might)", "Heavy Armor (Might)", "Feats of Strength (Might)", "Grappling (Might)", "Intimidation (Might)", "Breaching (Might)", "Demolitions (Might)", "Power Strike (Might)", "Siegecraft (Might)",
+        "Light Armor (Agility)", "Acrobatics (Agility)", "Marksmanship (Agility)", "Archery (Agility)", "Finesse Weapons (Agility)", "Sleight of Hand (Agility)", "Stealth (Agility)", "Ground Vehicles (Agility)", "Aircraft Piloting (Agility)", "Quick Draw (Agility)", "Evasion (Agility)", "Throwing (Agility)", "Thievery (Agility)", "Riding (Agility)", "Danger Sense (Agility)",
+        "Endurance (Vigor)", "Survival (Vigor)", "Fortitude (Vigor)", "Cold Resistance (Vigor)", "Heat Resistance (Vigor)", "Pain Tolerance (Vigor)", "Swimming (Vigor)", "Foraging (Vigor)", "Recovery (Vigor)", "Shields (Vigor)", "Zero-G Adaptation (Vigor)", "Hardiness (Vigor)", "Repair (Vigor)",
+        "History (Intellect)", "Xenology (Intellect)", "Science (Intellect)", "Medicine (Intellect)", "Investigation (Intellect)", "Engineering (Intellect)", "Computer Science (Intellect)", "Languages (Intellect)", "Tactics (Intellect)", "Lore (Intellect)", "Arcana (Intellect)", "Nature (Intellect)", "Alchemy (Intellect)", "Technical Lore (Intellect)", "Crafting (Intellect)",
+        "Perception (Awareness)", "Tracking (Awareness)", "Insight (Awareness)", "Searching (Awareness)", "Threat Detection (Awareness)", "Reconnaissance (Awareness)", "Drone Operations (Awareness)", "Navigation (Awareness)", "Streetwise (Awareness)", "Hunting (Awareness)", "Scouting (Awareness)", "Animal Handling (Awareness)",
+        "Persuasion (Presence)", "Deception (Presence)", "Diplomacy (Presence)", "Leadership (Presence)", "Performance (Presence)", "Etiquette (Presence)", "Bartering (Presence)", "Seduction (Presence)", "Inspiration (Presence)", "Communication (Presence)",
+        "Concentration (Will)", "Courage (Will)", "Discipline (Will)", "Meditation (Will)", "Resolve (Will)", "Mental Defense (Will)", "Conviction (Will)", "Command (Will)", "Resistance (Will)", "Ritual Focus (Will)", "Combat Focus (Will)", "Faith (Will)",
+        "Spellcraft (Mysticism)", "Ritual Magic (Mysticism)", "Enchanting (Mysticism)", "Divination (Mysticism)", "Summoning (Mysticism)", "Spirit Lore (Mysticism)", "Necromancy (Mysticism)", "Occultism (Mysticism)", "Magical Theory (Mysticism)", "Mystic Sense (Mysticism)", 
+        "Cybernetics (Technology)", "Hacking (Technology)", "Robotics (Technology)", "Electronics (Technology)", "Systems Engineering (Technology)", "Artificial Intelligence (Technology)", "Advanced Weapons (Technology)", "Electronic Warfare (Technology)", "Alien Technology (Technology)", "Technological Theory (Technology)"
+    ];
+
+    const degrees = [
+        "Inept (-2 / D4)",
+        "Untrained (0 / D6)",
+        "Trained (+2 / D8)",
+        "Expert (+4 / D10)",
+        "Genius (+6 / D12)"
+    ];
+
+    function onSettingChange() {
+        const setting = document.getElementById('charSetting').value;
+        const speciesSelect = document.getElementById('charSpecies');
+        const professionSelect = document.getElementById('charProfession');
+
+        speciesSelect.innerHTML = '';
+        dataBySetting[setting].species.forEach(sp => {
+            const opt = document.createElement('option');
+            opt.value = sp;
+            opt.textContent = sp;
+            speciesSelect.appendChild(opt);
+        });
+
+        professionSelect.innerHTML = '';
+        dataBySetting[setting].professions.forEach(prof => {
+            const opt = document.createElement('option');
+            opt.value = prof;
+            opt.textContent = prof;
+            professionSelect.appendChild(opt);
+        });
+
+        initSkillsGrid();
+        initEquipmentGrid();
+    }
+
+    function initSkillsGrid() {
+        const container = document.getElementById('skillsGrid');
+        container.innerHTML = '';
+        for (let i = 1; i <= 30; i++) {
+            const row = document.createElement('div');
+            row.className = 'skill-row-box';
+
+            const sSelect = document.createElement('select');
+            sSelect.className = 'skill-select';
+            skillsList.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s === "-- Select Skill --" ? "" : s;
+                opt.textContent = s;
+                sSelect.appendChild(opt);
+            });
+
+            const dSelect = document.createElement('select');
+            dSelect.className = 'degree-select';
+            degrees.forEach((d, idx) => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = d;
+                if (idx === 1) opt.selected = true;
+                dSelect.appendChild(opt);
+            });
+
+            row.appendChild(sSelect);
+            row.appendChild(dSelect);
+            container.appendChild(row);
+        }
+        
+        onSelectionChange();
+    }
+
+    function initEquipmentGrid() {
+        const container = document.getElementById('equipmentGrid');
+        container.innerHTML = '';
+        const setting = document.getElementById('charSetting').value;
+        const defaultList = dataBySetting[setting].defaultGear;
+
+        for (let i = 1; i <= 20; i++) {
+            const row = document.createElement('div');
+            row.className = 'equipment-row-box';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'equipment-input';
+            input.placeholder = `Item slot ${i}...`;
+            if (i <= defaultList.length) {
+                input.value = defaultList[i - 1];
+            }
+
+            row.appendChild(input);
+            container.appendChild(row);
+        }
+    }
+
+    function onSelectionChange() {
+        const selectedSpecies = document.getElementById('charSpecies').value;
+        const selectedProfession = document.getElementById('charProfession').value;
+
+        const speciesSkills = baseSpeciesSkills[selectedSpecies] || [];
+        const professionSkills = universalProfessionSkills[selectedProfession] || [];
+
+        const allUniqueSkills = [...new Set([...speciesSkills, ...professionSkills])];
+
+        const skillSelects = document.querySelectorAll('.skill-select');
+        const degreeSelects = document.querySelectorAll('.degree-select');
+
+        skillSelects.forEach((select, idx) => {
+            select.selectedIndex = 0;
+            degreeSelects[idx].selectedIndex = 1; // Default Untrained
+        });
+
+        allUniqueSkills.forEach((skill, idx) => {
+            if (idx < skillSelects.length) {
+                skillSelects[idx].value = skill;
+
+                const isInSpecies = speciesSkills.includes(skill);
+                const isInProfession = professionSkills.includes(skill);
+
+                if (isInSpecies && isInProfession) {
+                    degreeSelects[idx].selectedIndex = 3; // Expert (+4 / D10)
+                } else {
+                    degreeSelects[idx].selectedIndex = 2; // Trained (+2 / D8)
+                }
+            }
+        });
+    }
+
+    function generateRandomCharacter() {
+        const firstNames = ["Kaelen", "Lyra", "Jax", "Varis", "Nyx", "Orion", "Thalia", "Zephyr", "Cora", "Dax"];
+        const lastNames = ["Vane", "Stark", "Shadowweaver", "Voss", "Sterling", "Cross", "Dawnrunner", "Nox", "Valen", "Rix"];
+        document.getElementById('charName').value = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastNames[Math.floor(Math.random() * lastNames.length)];
+        document.getElementById('charPlayer').value = "Operative One";
+
+        const settings = ["sci-fi", "fantasy"];
+        const chosenSetting = settings[Math.floor(Math.random() * settings.length)];
+        document.getElementById('charSetting').value = chosenSetting;
+        onSettingChange();
+
+        const speciesOpts = document.getElementById('charSpecies').options;
+        document.getElementById('charSpecies').selectedIndex = Math.floor(Math.random() * speciesOpts.length);
+
+        const profOpts = document.getElementById('charProfession').options;
+        document.getElementById('charProfession').selectedIndex = Math.floor(Math.random() * profOpts.length);
+
+        onSelectionChange();
+
+        const apts = ['aptMight', 'aptAgility', 'aptVigor', 'aptIntellect', 'aptAwareness', 'aptPresence', 'aptWill', 'aptTech'];
+        apts.forEach(aptId => {
+            const selectEl = document.getElementById(aptId);
+            selectEl.selectedIndex = Math.floor(Math.random() * selectEl.options.length);
+        });
+    }
+
+    window.onload = function() {
+        onSettingChange();
+    };
+</script>
+
+</body>
+</html>
